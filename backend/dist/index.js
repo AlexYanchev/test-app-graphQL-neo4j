@@ -2,10 +2,14 @@ import { ApolloServer } from 'apollo-server';
 import { resolvers } from './graphql/resolvers.js';
 import typeDefs from './graphql/schemaTypes.js';
 import { Neo4jGraphQL } from '@neo4j/graphql';
-import neo4j from 'neo4j-driver';
 import dotenv from 'dotenv';
+import getDriverNeo from './api/aura-connect.js';
 dotenv.config();
-const driver = neo4j.driver('bolt://localhost:7687', neo4j.auth.basic('neo4j', '12345678'));
+// const driver = neo4j.driver(
+//   'bolt://localhost:7687',
+//   neo4j.auth.basic('neo4j', '12345678')
+// );
+const driver = await getDriverNeo();
 const neoSchema = new Neo4jGraphQL({
     typeDefs,
     resolvers,

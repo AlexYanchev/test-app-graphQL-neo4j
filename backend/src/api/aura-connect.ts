@@ -1,6 +1,6 @@
 import neo4j from 'neo4j-driver';
 
-(async () => {
+export default async function getDriverNeo() {
   // URI examples: 'neo4j://localhost', 'neo4j+s://xxx.databases.neo4j.io'
   const URI = process.env.NEO4J_URI || '';
   const USER = process.env.NEO4J_USERNAME || '';
@@ -12,7 +12,9 @@ import neo4j from 'neo4j-driver';
     const serverInfo = await driver.getServerInfo();
     console.log('Connection established');
     console.log(serverInfo);
+
+    return driver;
   } catch (err: any) {
     console.log(`Connection error\n${err}\nCause: ${err.cause}`);
   }
-})();
+}
