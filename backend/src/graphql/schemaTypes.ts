@@ -13,7 +13,8 @@ const typeDefs = gql`
     reviews: [Review!]! @relationship(type: "REVIEWS", direction: IN)
     categories: [Category!]! @relationship(type: "IN_CATEGORY", direction: OUT)
     waitTime: Int! @customResolver
-    averageStars: Float!
+    averageStars: Float
+      @authentication
       @cypher(
         statement: "MATCH (this)<-[:REVIEWS]-(r:Review) RETURN avg(r.stars) AS averageStars"
         columnName: "averageStars"
@@ -31,11 +32,31 @@ const typeDefs = gql`
       )
   }
 
+  type JWT @jwt {
+    roles: [String!]!
+  }
+
   type User {
     userId: ID!
     name: String!
     reviews: [Review!]! @relationship(type: "WROTE", direction: OUT)
   }
+
+  extend type User
+    @authorization(
+      validate: [
+        {
+          operations: [CREATE, UPDATE]
+          when: [AFTER]
+          where: { node: { userId: "$jwt.sub" } }
+        }
+        {
+          operations: [CREATE, UPDATE, DELETE]
+          where: { jwt: { roles_INCLUDES: "admin" } }
+        }
+      ]
+      filter: [{ operations: [READ], where: { node: { userId: "$jwt.sub" } } }]
+    )
 
   type Review {
     reviewId: ID!
@@ -68,98 +89,17 @@ const typeDefs = gql`
         YIELD node RETURN node AS fuzzyBusinessByName
         """
       )
+
+    qualityBusinesses: [Business!]!
+      @cypher(
+        columnName: "qualityBusinesses"
+        statement: """
+        MATCH (b:Business)<-[:REVIEWS]-(r:Review)
+        WHERE r.stars = 3
+        RETURN b as qualityBusinesses
+        """
+      )
   }
 `;
 
 export default typeDefs;
-//   enum BusinessOrdering {
-//     name_asc
-//     name_desc
-//   }
-
-//   enum ReviewOrdering {
-//     stars_asc
-//     stars_desc
-//   }
-
-//   type Business {
-//     businessId: ID!
-//     name: String
-//     address: String
-//     avgStars: Float
-//     photos(first: Int = 3, offset: Int = 0): [Photo!]!
-//     reviews(
-//       first: Int = 3
-//       offset: Int = 0
-//       orderBy: ReviewOrdering = stars_desc
-//     ): [Review!]!
-//     categories: [Category]
-//   }
-
-//   type User {
-//     userId: ID!
-//     name: String
-//     photos(first: Int = 3, offset: Int = 0): [Photo!]!
-//     reviews(first: Int = 3, offset: Int = 0): [Review!]!
-//   }
-
-//   type Photo {
-//     photoId: ID!
-//     business: Business!
-//     user: User!
-//     url: String
-//   }
-
-//   type Review {
-//     reviewId: ID!
-//     stars: Float
-//     text: String
-//     user: User!
-//     business: Business!
-//   }
-
-//   type Category {
-//     categoryId: ID!
-//     name: String!
-//     businesses: [Business]
-//   }
-
-//   type Query {
-//     allBusinesses(first: Int = 10, offset: Int = 0): [Business!]!
-//     businessBySearchTerm(
-//       search: String!
-//       first: Int = 10
-//       offset: Int = 0
-//       orderBy: BusinessOrdering = name_asc
-//     ): [Business!]!
-//     userById(id: ID!): User
-//     categories: [Category]
-//   }
-// `;
-
-// export default typeDefs;
-
-// query businessSearch(
-//   $searchTerm: String!
-//   $businessLimit: Int
-//   $businessSkip: Int
-//   $businessOrder: BusinessOrdering
-//   $reviewLimit: Int
-// ) {
-//   businessBySearchTerm(
-//     search: $searchTerm
-//     first: $businessLimit
-//     offset: $businessSkip
-//     orderBy: $businessOrder
-//   ) {
-//     name
-//     avgStars
-//     reviews(first: $reviewLimit) {
-//       stars
-//       text
-//       user {
-//         name
-//       }
-//     }
-//   }
-// }

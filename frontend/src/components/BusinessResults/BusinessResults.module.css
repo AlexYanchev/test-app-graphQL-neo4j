@@ -1,0 +1,12 @@
+.table_results_container {
+  width: 100%;
+  border: 1px solid rgba(178, 178, 178, 0.471);
+}
+
+.table_results_container td {
+  text-align: center;
+}
+
+.table_results_container thead > tr {
+  background-color: rgba(178, 178, 178, 0.471);
+}
