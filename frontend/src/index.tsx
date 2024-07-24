@@ -17,7 +17,7 @@ export const starredVar = makeVar<any[]>([]);
 const AppWithApollo = () => {
   const { jwt, isValid } = useSessionData();
 
-  const httpLink = createHttpLink({ uri: 'http://localhost:4000' });
+  const httpLink = createHttpLink({ uri: process.env.REACT_APP_GRAPHQL_URI });
 
   const authLink = setContext(async (_, { headers }) => {
     if (jwt) {
