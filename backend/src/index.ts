@@ -12,26 +12,27 @@ dotenv.config();
 //   'bolt://localhost:7687',
 //   neo4j.auth.basic('neo4j', '12345678')
 // );
-const driver = await getDriverNeo();
-
-const neoSchema = new Neo4jGraphQL({
-  typeDefs,
-  resolvers,
-  driver,
-  debug: true,
-  features: {
-    authorization: {
-      key: {
-        url: 'https://7accf451-0fe6-4a52-bf51-a5109cab406a.hanko.io/.well-known/jwks.json',
-      },
-    },
-    // authorization: {
-    //   key: process.env.JWT_SECRET || '',
-    // },
-  },
-});
 
 const initServer = async () => {
+  const driver = await getDriverNeo();
+
+  const neoSchema = new Neo4jGraphQL({
+    typeDefs,
+    resolvers,
+    driver,
+    debug: true,
+    features: {
+      authorization: {
+        key: {
+          url: 'https://7accf451-0fe6-4a52-bf51-a5109cab406a.hanko.io/.well-known/jwks.json',
+        },
+      },
+      // authorization: {
+      //   key: process.env.JWT_SECRET || '',
+      // },
+    },
+  });
+
   return await neoSchema
     .getSchema()
     .then((schema) => {
@@ -51,7 +52,7 @@ const initServer = async () => {
     });
 };
 
-exports.handler = async (event: any, context: any, callback: any) => {
+export const handler = async (event: any, context: any, callback: any) => {
   const serverHandler = await initServer();
 
   if (serverHandler) {
@@ -62,6 +63,17 @@ exports.handler = async (event: any, context: any, callback: any) => {
     );
   }
 };
+// exports.handler = async (event: any, context: any, callback: any) => {
+//   const serverHandler = await initServer();
+
+//   if (serverHandler) {
+//     return serverHandler(
+//       { ...event, requestContext: event.requestContext || {} },
+//       context,
+//       callback
+//     );
+//   }
+// };
 
 // neoSchema
 //   .getSchema()
