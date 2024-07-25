@@ -3,7 +3,7 @@ command = "CI= npm run build"
 publish = "build"
 
 [functions]
-directory = "../backend/src"
+directory = "src/lambda"
 
 [[redirects]]
 from = "/graphql"

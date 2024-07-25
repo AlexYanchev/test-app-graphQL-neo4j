@@ -1,9 +1,9 @@
 [build]
-command = "npm run build"
+command = "CI= npm run build"
 publish = "build"
 
 [functions]
-directory = "src/lambda/graphql"
+directory = "../backend/src"
 
 [[redirects]]
 from = "/graphql"
